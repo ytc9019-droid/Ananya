@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Love Letter For You 💌</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', 'Garamond', serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .main-container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    /* Envelope Animation */
+    .envelope-container {
+      perspective: 1000px;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .envelope {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-style: preserve-3d;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .envelope.opened {
+      transform: rotateX(180deg) translateZ(20px);
+      box-shadow: 0 30px 80px rgba(255, 215, 0, 0.3);
+    }
+
+    .envelope-front {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      backface-visibility: hidden;
+      border-radius: 20px;
+    }
+
+    .envelope-flap {
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-top: 100px solid #e74c3c;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: flapClose 0.8s ease-out backwards;
+    }
+
+    .envelope.opened .envelope-flap {
+      animation: flapOpen 0.8s ease-out forwards;
+    }
+
+    @keyframes flapOpen {
+      0% {
+        transform: translateX(-50%) rotateX(0deg);
+      }
+      100% {
+        transform: translateX(-50%) rotateX(-180deg);
+      }
+    }
+
+    @keyframes flapClose {
+      0% {
+        transform: translateX(-50%) rotateX(-180deg);
+      }
+      100% {
+        transform: translateX(-50%) rotateX(0deg);
+      }
+    }
+
+    .heart-stamp {
+      font-size: 60px;
+      animation: heartBeat 1.5s ease-in-out infinite;
+      z-index: 15;
+    }
+
+    @keyframes heartBeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      25% {
+        transform: scale(1.1);
+      }
+      50% {
+        transform: scale(1);
+      }
+    }
+
+    .click-hint {
+      position: absolute;
+      bottom: 15px;
+      font-size: 12px;
+      color: #999;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* Letter Content */
+    .letter-container {
+      background: linear-gradient(135deg, #fff9e6 0%, #fffef5 100%);
+      border-radius: 15px;
+      padding: 50px 40px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: letterAppear 1s ease-out 0.5s forwards;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #f0e68c;
+    }
+
+    @keyframes letterAppear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .letter-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: repeating-linear-gradient(90deg, transparent, transparent 10px, #d4af37 10px, #d4af37 20px);
+      opacity: 0.5;
+    }
+
+    .letter-date {
+      text-align: right;
+      color: #8b7355;
+      font-size: 14px;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    .letter-greeting {
+      font-size: 24px;
+      color: #c41e3a;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .letter-content {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: justify;
+      text-indent: 40px;
+    }
+
+    .letter-content p {
+      margin-bottom: 15px;
+    }
+
+    .letter-content strong {
+      color: #c41e3a;
+      font-style: italic;
+    }
+
+    .letter-signature {
+      margin-top: 40px;
+      text-align: right;
+    }
+
+    .signature-text {
+      font-size: 18px;
+      color: #8b4513;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .signature-name {
+      font-size: 28px;
+      color: #c41e3a;
+      font-weight: 700;
+      font-family: 'Brush Script MT', cursive;
+    }
+
+    .decorative-hearts {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      font-size: 24px;
+      animation: floatHearts 3s ease-in-out infinite;
+    }
+
+    @keyframes floatHearts {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      animation: fadeIn 1s ease-out 1s backwards;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: 2px solid #e74c3c;
+      background: transparent;
+      color: #fff;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .tab-btn:hover {
+      background: #e74c3c;
+      transform: translateY(-2px);
+    }
+
+    .tab-btn.active {
+      background: #e74c3c;
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Memories Section */
+    .memories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .memory-card {
+      background: linear-gradient(135deg, #fff9e6 0%, #fffef5 100%);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #e74c3c;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .memory-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(231, 76, 60, 0.2);
+    }
+
+    .memory-title {
+      font-weight: 700;
+      color: #c41e3a;
+      margin-bottom: 8px;
+    }
+
+    .memory-text {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      aspect-ratio: 1;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .gallery-item::after {
+      content: '❤️';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 40px;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+      transition: all 0.3s ease;
+    }
+
+    .gallery-item:hover::after {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Music Player */
+    .music-player {
+      background: linear-gradient(135deg, #e74c3c, #c41e3a);
+      padding: 20px;
+      border-radius: 15px;
+      color: white;
+      margin: 20px 0;
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    .music-player h3 {
+      margin: 0 0 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .music-player audio {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .playlist {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .playlist-item {
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .playlist-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .playlist-item.playing {
+      background: rgba(255, 255, 255, 0.2);
+      font-weight: 700;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 30px 0;
+      animation: fadeIn 1s ease-out 1.5s backwards;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #e74c3c, #c41e3a);
+      color: white;
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid white;
+    }
+
+    .btn-secondary:hover {
+      background: white;
+      color: #e74c3c;
+      transform: translateY(-3px);
+    }
+
+    /* Floating Hearts */
+    .heart-float {
+      position: fixed;
+      font-size: 20px;
+      animation: floatUp 3s ease-in infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      to {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .letter-container {
+        padding: 30px 20px;
+      }
+
+      .envelope {
+        height: 200px;
+      }
+
+      .envelope-flap {
+        border-left: 100px solid transparent;
+        border-right: 100px solid transparent;
+        border-top: 70px solid #e74c3c;
+      }
+
+      .heart-stamp {
+        font-size: 40px;
+      }
+
+      .letter-greeting {
+        font-size: 20px;
+      }
+
+      .letter-content {
+        font-size: 14px;
+        text-indent: 20px;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Envelope Section -->
+    <div class="envelope-container">
+      <div class="envelope" id="envelope">
+        <div class="envelope-front">
+          <div class="heart-stamp">💌</div>
+          <div class="click-hint">Click to open the letter</div>
+        </div>
+        <div class="envelope-flap"></div>
+      </div>
+    </div>
+
+    <!-- Letter Content -->
+    <div class="letter-container" id="letterContainer" style="display: none;">
+      <!-- Tab Navigation -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="letter">📝 The Letter</button>
+        <button class="tab-btn" data-tab="memories">💫 Our Memories</button>
+        <button class="tab-btn" data-tab="gallery">📸 Gallery</button>
+        <button class="tab-btn" data-tab="music">🎵 Playlist</button>
+      </div>
+
+      <!-- Letter Tab -->
+      <div id="letter" class="tab-content active">
+        <div class="letter-date" id="currentDate"></div>
+        
+        <div class="letter-greeting">Dear Love Ananya❤️,</div>
+        
+        <div class="letter-content">
+          <p>I've been trying to find the perfect words to express what you mean to me, and I realized that no amount of words could truly capture the depth of my feelings. So I'm writing this letter to you, hoping it brings a smile to your face.</p>
+
+          <p>From the moment I saw you, something in my heart changed. You're not just beautiful on the outside, but your <strong>kindness, intelligence, and compassion</strong> shine brighter than any star. Every moment spent with you feels like a beautiful dream I don't want to wake up from.</p>
+
+          <p>The way you laugh at my siliest jokes , the way you care about me, the little things you do without realizing how much they mean to me – these are the moments that make my days complete. You inspire me to be a better person, and I'm grateful for every second we share together.</p>
+
+          <p>When I'm with you, time seems to stand still. Your presence brings peace to my restless soul, and your smile is the most beautiful thing I've ever seen NGL it's so true. I find myself thinking about you at the most unexpected moments – during coffee, in the middle of work, before sleep BTW it is so madetory – and every thought brings warmth to my heart.</p>
+
+          <p>I want you to know that you're not just my crush, you're my INSPIRATION, my comfort, and my happiness. <strong>I admire your BEAUTY, your MATURENESS, and the way you face life with such grace.</strong> You make the ordinary moments extraordinary, and I cherish every memory we've created together.</p>
+
+          <p> Even tho we did'nt spend a lot time togher tho in this short time period i got to know that you're most appropiate gil i've ever seen, many highs and lows came between us but trust me ANANYA i nver stopped loving you and i can never ig that level of madness i've reached i can't express those feelings  – I just want a chance to make you as happy as you make me. I want to be there for you through thick and thin, to support your dreams, and to build beautiful memories together.</p>
+
+          <p>This letter is my heart on paper – raw, honest, and completely devoted to you. You deserve someone who will love you unconditionally, and I promise to be that person. You are worth every effort, every word, and every moment of my time.</p>
+
+          <p>I hope this letter finds you smiling. I hope it makes your heart skip a beat just like you make mine skip a beat every single day last but not the least can we start this year together agian i am asking genuinely.</p>
+
+          <div class="decorative-hearts">❤️ 💕 ❤️ 💕 ❤️</div>
+
+          <p>Forever yours,</p>
+        </div>
+
+        <div class="letter-signature">
+          <div class="signature-text">With all my love,</div>
+          <div class="signature-name">Debjyoti Ray</div>
+          <div style="font-size: 16px; color: #c41e3a; margin-top: 10px;">💝</div>
+        </div>
+      </div>
+
+      <!-- Memories Tab -->
+      <div id="memories" class="tab-content">
+        <h3 style="color: #c41e3a; margin-bottom: 20px;">✨ Precious Moments ✨</h3>
+        <div class="memories-grid">
+          <div class="memory-card">
+            <div class="memory-title">First Meeting online tho</div>
+            <div class="memory-text">The day our eyes met, I knew something special was about to happen. Your smile changed everything.</div>
+          </div>
+
+          <div class="memory-card">
+            <div class="memory-title">Your Appearence</div>
+            <div class="memory-text">Nothing compares to the way you are Ananya.Your voice is music to my ears and joy to my heart.</div>
+          </div>
+
+          <div class="memory-card">
+            <div class="memory-title">Late Night Talks</div>
+            <div class="memory-text">Those conversations about dreams, life, and everything in between are my favorite moments with you.</div>
+          </div>
+
+          <div class="memory-card">
+            <div class="memory-title">Your Kindness</div>
+            <div class="memory-text">The best ever soul i have ever seen.</div>
+          </div>
+
+          <div class="memory-card">
+            <div class="memory-title">Simple moments</div>
+            <div class="memory-text">Simple moments like talking for so long time together mean the world to me when you're by my side.</div>
+          </div>
+
+          <div class="memory-card">
+            <div class="memory-title">Future Dreams</div>
+            <div class="memory-text">I dream of building a beautiful future with you, filled with love, laughter, and endless happiness.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery Tab -->
+      <div id="gallery" class="tab-content">
+        <h3 style="color: #c41e3a; margin-bottom: 20px;">🌹 flowers for you 🌹</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop" alt="Sunset moment">
+          </div>
+          <div class="gallery-item">
+            <img src="https://pngimg.com/uploads/tulip/tulip_PNG9020.png" alt="Romantic flowers">
+          </div>
+          <div class="gallery-item">
+            <img src="https://tse1.mm.bing.net/th/id/OIP.ecLAGNf9vgouBcjurea5ZQHaOl?pid=Api&P=0&h=180=crop" alt="Garden beauty">
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=300&h=300&fit=crop" alt="Rose elegance">
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop" alt="Nature's love">
+          </div>
+          <div class="gallery-item">
+            <img src="https://png.pngtree.com/png-clipart/20220730/original/pngtree-purple-tulip-flower-png-png-image_8443354.png" alt="Flower petals">
+          </div>
+        </div>
+      </div>
+
+      <!-- Music Tab -->
+      <div id="music" class="tab-content">
+        <div class="music-player">
+          <h3>🎵 Songs From My Heart 🎵</h3>
+          <audio id="bgMusic" controls>
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+            Your browser does not support audio.
+          </audio>
+
+          <div class="playlist">
+            <h4 style="margin: 0 0 12px; color: white; font-size: 14px;">📋 Romantic Playlist</h4>
+            <div class="playlist-item playing" data-src="C:\Users\roysh\Downloads\The Neighbourhood - Reflections (Official Audio).mp3">
+              <span>♫</span> When I Saw You
+            </div>
+            <div class="playlist-item" data-src="C:\Users\roysh\Downloads\The Neighbourhood - Sweater Weather (Official Video).mp3">
+              <span>♫</span> Sweater Weather               
+              <span>♫</span> Endless Love
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons" id="actionButtons" style="display: none;">
+      <button class="btn btn-primary" id="respondBtn">💌 Respond to This Letter</button>
+      <button class="btn btn-secondary" id="shareBtn">📤 Share This Love Letter</button>
+      <button class="btn btn-secondary" id="printBtn">🖨️ Print This Letter</button>
+    </div>
+
+    <footer>
+      <p>Made with ❤️ by someone who truly cares about you</p>
+      <p style="font-size: 12px; margin-top: 10px; opacity: 0.6;">© 2025 • A Digital Love Letter</p>
+    </footer>
+  </div>
+
+  <script>
+    // Envelope Click Handler
+    const envelope = document.getElementById('envelope');
+    const letterContainer = document.getElementById('letterContainer');
+    const actionButtons = document.getElementById('actionButtons');
+    let isOpened = false;
+
+    envelope.addEventListener('click', function() {
+      isOpened = !isOpened;
+      if (isOpened) {
+        envelope.classList.add('opened');
+        setTimeout(() => {
+          letterContainer.style.display = 'block';
+          actionButtons.style.display = 'flex';
+          createFloatingHearts();
+        }, 600);
+      } else {
+        letterContainer.style.display = 'none';
+        actionButtons.style.display = 'none';
+        envelope.classList.remove('opened');
+      }
+    });
+
+    // Set Current Date
+    const dateElement = document.getElementById('currentDate');
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    dateElement.textContent = today.toLocaleDateString('en-US', options);
+
+    // Tab Switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabName = button.getAttribute('data-tab');
+        
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        button.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+
+    // Music Playlist
+    const audio = document.getElementById('bgMusic');
+    const playlistItems = document.querySelectorAll('.playlist-item');
+
+    playlistItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const src = item.getAttribute('data-src');
+        audio.src = src;
+        audio.play();
+
+        playlistItems.forEach(i => i.classList.remove('playing'));
+        item.classList.add('playing');
+      });
+    });
+
+    // Floating Hearts
+    function createFloatingHearts() {
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+          const heart = document.createElement('div');
+          heart.textContent = '❤️';
+          heart.className = 'heart-float';
+          heart.style.left = Math.random() * 100 + '%';
+          heart.style.bottom = '-10px';
+          heart.style.animationDuration = (3 + Math.random() * 2) + 's';
+          document.body.appendChild(heart);
+
+          setTimeout(() => heart.remove(), 5000);
+        }, i * 100);
+      }
+    }
+
+    // Respond Button
+    document.getElementById('respondBtn').addEventListener('click', () => {
+      alert('💝 Thank you for reading my letter!\n\nI hope it touched your heart as much as you touch mine every day.\n\nWould you like to meet and talk about us? 🌹');
+      createFloatingHearts();
+    });
+
+    // Share Button
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      const text = 'Someone special created a beautiful digital love letter for me! Check it out: ' + window.location.href;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'A Love Letter For You 💌',
+          text: text
+        });
+      } else {
+        alert('Share this link:\n' + window.location.href);
+      }
+    });
+
+    // Print Button
+    document.getElementById('printBtn').addEventListener('click', () => {
+      window.print();
+    });
+
+    // Auto-create floating hearts on page load
+    window.addEventListener('load', () => {
+      setInterval(() => {
+        if (Math.random() > 0.8) {
+          const heart = document.createElement('div');
+          heart.textContent = '💕';
+          heart.className = 'heart-float';
+          heart.style.left = Math.random() * 100 + '%';
+          heart.style.bottom = '-10px';
+          heart.style.fontSize = (14 + Math.random() * 12) + 'px';
+          heart.style.animationDuration = (4 + Math.random() * 2) + 's';
+          document.body.appendChild(heart);
+
+          setTimeout(() => heart.remove(), 6000);
+        }
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
+// ...existing code...
