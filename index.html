@@ -227,6 +227,35 @@
       exprEl.textContent = expression || '0';
     }
 
+    // Find the start index of the last operand (number, identifier like ANS/pi, or parenthesized expression)
+    function findLastOperandStart(expr){
+      if(!expr) return 0;
+      let i = expr.length - 1;
+      if(expr[i] === ')'){
+        // find matching '('
+        let depth = 1;
+        i--;
+        while(i >= 0 && depth > 0){
+          if(expr[i] === ')') depth++;
+          else if(expr[i] === '(') depth--;
+          i--;
+        }
+        return i + 1;
+      }
+      // otherwise find start of last continuous token (letters, digits, dot)
+      while(i >= 0 && /[A-Za-z0-9._]/.test(expr[i])) i--;
+      return i + 1;
+    }
+
+    function wrapLastOperandWith(funcName){
+      if(!expression) { expression += funcName + '('; return; }
+      const lastChar = expression[expression.length - 1];
+      if(!/[0-9A-Za-z._)]/.test(lastChar)) { expression += funcName + '('; return; }
+      const start = findLastOperandStart(expression);
+      const token = expression.slice(start);
+      expression = expression.slice(0, start) + funcName + '(' + token + ',';
+    }
+
     function safeEval(input){
       // Replace unicode symbols
       let s = input.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
@@ -258,9 +287,9 @@
         s = s.replace(re, tokens[k]);
       });
 
-      // Replace nCr / nPr typed by the user to our helper function names
-      s = s.replace(/\bnCr\b/g, 'comb');
-      s = s.replace(/\bnPr\b/g, 'perm');
+      // Convert infix 'nCr' and 'nPr' between two operands into comb(a,b) and perm(a,b)
+      s = s.replace(/(\([^()]*\)|\d+(?:\.\d+)?)\s*nCr\s*(\([^()]*\)|\d+(?:\.\d+)?)/gi, 'comb($1,$2)');
+      s = s.replace(/(\([^()]*\)|\d+(?:\.\d+)?)\s*nPr\s*(\([^()]*\)|\d+(?:\.\d+)?)/gi, 'perm($1,$2)');
 
       // exponent operator ^ -> Math.pow(a,b)
       // Convert a^b to Math.pow(a,b) using a simple parser for ^ (right associative)
@@ -332,8 +361,8 @@
             expression += 'fact(';
           }
           break;
-        case 'perm': expression += 'perm('; break;
-        case 'comb': expression += 'comb('; break;
+        case 'perm': wrapLastOperandWith('perm'); break;
+        case 'comb': wrapLastOperandWith('comb'); break;
         case 'factoradic':
           // If there is a number expression already, evaluate and show factoradic directly
           if(expression && /\d|\)$/.test(expression.slice(-1))){
