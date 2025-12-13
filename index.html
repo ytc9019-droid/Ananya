@@ -1,800 +1,382 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A Love Letter For You 💌</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scientific Calculator (Single File)</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* Inlined CSS for Scientific Calculator (copied from calculator.css) */
+    :root{
+      --bg: #0f1724; /* dark blue */
+      --panel: #111827;
+      --accent: linear-gradient(135deg, #f43f5e, #7c3aed);
+      --glass: rgba(255,255,255,0.04);
+      --muted: #9ca3af;
+      --text: #e6eef8;
+      --success: #22c55e;
     }
-
-    body {
-      font-family: 'Georgia', 'Garamond', serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-      padding: 20px;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(closest-side, #051021 0%, var(--bg) 45%);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
     }
-
-    .main-container {
-      max-width: 900px;
-      width: 100%;
+    .calc-wrap{
+      width: min(720px, 95vw);
+      border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+      box-shadow: 0 4px 36px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.04);
     }
-
-    /* Envelope Animation */
-    .envelope-container {
-      perspective: 1000px;
-      margin-bottom: 40px;
-      animation: fadeIn 1s ease-out;
+    .calc-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:18px 20px;
+      gap:12px;
     }
-
-    .envelope {
-      width: 100%;
-      height: 300px;
-      background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      transform-style: preserve-3d;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+    .calc-header h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:0.6px;
+      color:var(--text);
+      font-weight:600;
     }
-
-    .envelope.opened {
-      transform: rotateX(180deg) translateZ(20px);
-      box-shadow: 0 30px 80px rgba(255, 215, 0, 0.3);
+    .mode{display:flex;gap:8px;align-items:center;color:var(--muted)}
+    .display{
+      padding:16px 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+      border-top:1px solid rgba(255,255,255,0.02);
     }
-
-    .envelope-front {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      backface-visibility: hidden;
-      border-radius: 20px;
+    .expr{
+      text-align:right;
+      color:var(--muted);
+      font-size:16px;
+      min-height:20px;
     }
-
-    .envelope-flap {
-      width: 0;
-      height: 0;
-      border-left: 150px solid transparent;
-      border-right: 150px solid transparent;
-      border-top: 100px solid #e74c3c;
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      animation: flapClose 0.8s ease-out backwards;
+    .result{
+      font-size:32px;
+      text-align:right;
+      margin-top:6px;
+      font-weight:600;
     }
-
-    .envelope.opened .envelope-flap {
-      animation: flapOpen 0.8s ease-out forwards;
+    .kbd{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+      padding:20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0));
     }
-
-    @keyframes flapOpen {
-      0% {
-        transform: translateX(-50%) rotateX(0deg);
-      }
-      100% {
-        transform: translateX(-50%) rotateX(-180deg);
-      }
-    }
-
-    @keyframes flapClose {
-      0% {
-        transform: translateX(-50%) rotateX(-180deg);
-      }
-      100% {
-        transform: translateX(-50%) rotateX(0deg);
-      }
-    }
-
-    .heart-stamp {
-      font-size: 60px;
-      animation: heartBeat 1.5s ease-in-out infinite;
-      z-index: 15;
-    }
-
-    @keyframes heartBeat {
-      0%, 100% {
-        transform: scale(1);
-      }
-      25% {
-        transform: scale(1.1);
-      }
-      50% {
-        transform: scale(1);
-      }
-    }
-
-    .click-hint {
-      position: absolute;
-      bottom: 15px;
-      font-size: 12px;
-      color: #999;
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    /* Letter Content */
-    .letter-container {
-      background: linear-gradient(135deg, #fff9e6 0%, #fffef5 100%);
-      border-radius: 15px;
-      padding: 50px 40px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-      opacity: 0;
-      transform: translateY(20px);
-      animation: letterAppear 1s ease-out 0.5s forwards;
-      position: relative;
-      overflow: hidden;
-      border: 2px solid #f0e68c;
-    }
-
-    @keyframes letterAppear {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .letter-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: repeating-linear-gradient(90deg, transparent, transparent 10px, #d4af37 10px, #d4af37 20px);
-      opacity: 0.5;
-    }
-
-    .letter-date {
-      text-align: right;
-      color: #8b7355;
-      font-size: 14px;
-      margin-bottom: 30px;
-      font-style: italic;
-    }
-
-    .letter-greeting {
-      font-size: 24px;
-      color: #c41e3a;
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-
-    .letter-content {
-      font-size: 16px;
-      line-height: 1.8;
-      color: #333;
-      margin-bottom: 20px;
-      text-align: justify;
-      text-indent: 40px;
-    }
-
-    .letter-content p {
-      margin-bottom: 15px;
-    }
-
-    .letter-content strong {
-      color: #c41e3a;
-      font-style: italic;
-    }
-
-    .letter-signature {
-      margin-top: 40px;
-      text-align: right;
-    }
-
-    .signature-text {
-      font-size: 18px;
-      color: #8b4513;
-      font-style: italic;
-      margin-bottom: 10px;
-    }
-
-    .signature-name {
-      font-size: 28px;
-      color: #c41e3a;
-      font-weight: 700;
-      font-family: 'Brush Script MT', cursive;
-    }
-
-    .decorative-hearts {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 20px 0;
-      font-size: 24px;
-      animation: floatHearts 3s ease-in-out infinite;
-    }
-
-    @keyframes floatHearts {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    /* Tab Navigation */
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      animation: fadeIn 1s ease-out 1s backwards;
-    }
-
-    .tab-btn {
-      padding: 10px 20px;
-      border: 2px solid #e74c3c;
-      background: transparent;
-      color: #fff;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      font-size: 14px;
-    }
-
-    .tab-btn:hover {
-      background: #e74c3c;
-      transform: translateY(-2px);
-    }
-
-    .tab-btn.active {
-      background: #e74c3c;
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-    }
-
-    .tab-content {
-      display: none;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Memories Section */
-    .memories-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin: 20px 0;
-    }
-
-    .memory-card {
-      background: linear-gradient(135deg, #fff9e6 0%, #fffef5 100%);
-      padding: 15px;
-      border-radius: 10px;
-      border-left: 4px solid #e74c3c;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .memory-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(231, 76, 60, 0.2);
-    }
-
-    .memory-title {
-      font-weight: 700;
-      color: #c41e3a;
-      margin-bottom: 8px;
-    }
-
-    .memory-text {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.6;
-    }
-
-    /* Gallery */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-      margin: 20px 0;
-    }
-
-    .gallery-item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 10px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-      aspect-ratio: 1;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .gallery-item:hover img {
-      transform: scale(1.1);
-    }
-
-    .gallery-item::after {
-      content: '❤️';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      font-size: 40px;
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0);
-      transition: all 0.3s ease;
-    }
-
-    .gallery-item:hover::after {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    /* Music Player */
-    .music-player {
-      background: linear-gradient(135deg, #e74c3c, #c41e3a);
-      padding: 20px;
-      border-radius: 15px;
-      color: white;
-      margin: 20px 0;
-      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
-    }
-
-    .music-player h3 {
-      margin: 0 0 15px;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .music-player audio {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-
-    .playlist {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .playlist-item {
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
-
-    .playlist-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateX(5px);
-    }
-
-    .playlist-item.playing {
-      background: rgba(255, 255, 255, 0.2);
-      font-weight: 700;
-    }
-
-    /* Action Buttons */
-    .action-buttons {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 30px 0;
-      animation: fadeIn 1s ease-out 1.5s backwards;
-    }
-
-    .btn {
-      padding: 12px 28px;
-      font-size: 14px;
-      font-weight: 600;
+    .btn{
       border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
+      border-radius:10px;
+      padding:16px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:var(--text);
+      font-weight:600;
+      font-size:16px;
+      cursor:pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
     }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #e74c3c, #c41e3a);
-      color: white;
-      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(231, 76, 60, 0.4);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 2px solid white;
-    }
-
-    .btn-secondary:hover {
-      background: white;
-      color: #e74c3c;
-      transform: translateY(-3px);
-    }
-
-    /* Floating Hearts */
-    .heart-float {
-      position: fixed;
-      font-size: 20px;
-      animation: floatUp 3s ease-in infinite;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    @keyframes floatUp {
-      to {
-        transform: translateY(-100vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 14px;
-    }
-
-    @media (max-width: 768px) {
-      .letter-container {
-        padding: 30px 20px;
-      }
-
-      .envelope {
-        height: 200px;
-      }
-
-      .envelope-flap {
-        border-left: 100px solid transparent;
-        border-right: 100px solid transparent;
-        border-top: 70px solid #e74c3c;
-      }
-
-      .heart-stamp {
-        font-size: 40px;
-      }
-
-      .letter-greeting {
-        font-size: 20px;
-      }
-
-      .letter-content {
-        font-size: 14px;
-        text-indent: 20px;
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .btn:active{transform: translateY(1px) scale(0.995)}
+    .btn:hover{filter:brightness(1.06)}
+    .btn.op{background: linear-gradient(180deg, rgba(124,58,237,0.95), rgba(124,58,237,0.85)); color:white}
+    .btn.equals{grid-column: 4 / 5; background: var(--accent); color:white; box-shadow: 0 8px 30px rgba(124,58,237,0.18)}
+    .btn.wide{grid-column: span 2}
+    .sc-row{grid-column: 1 / 5; display:flex; gap:12px;}
+    .sc{flex:1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03)}
+    .credits{font-size:12px;padding:12px 20px;color:var(--muted)}
+    /* Responsive */
+    @media (max-width:560px){
+      .kbd{grid-template-columns: repeat(3, 1fr)}
+      .btn.equals{grid-column:auto}
+      .btn.wide{grid-column: span 2}
     }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <!-- Envelope Section -->
-    <div class="envelope-container">
-      <div class="envelope" id="envelope">
-        <div class="envelope-front">
-          <div class="heart-stamp">💌</div>
-          <div class="click-hint">Click to open the letter</div>
-        </div>
-        <div class="envelope-flap"></div>
+  <main class="calc-wrap" role="application" aria-label="Scientific calculator">
+    <header class="calc-header">
+      <h1>Scientific Calculator</h1>
+      <div class="mode">
+        <label for="angle-toggle">Radians</label>
+        <input id="angle-toggle" type="checkbox" aria-label="Angle mode: toggle to degrees">
+        <label for="angle-toggle">Degrees</label>
       </div>
-    </div>
+    </header>
 
-    <!-- Letter Content -->
-    <div class="letter-container" id="letterContainer" style="display: none;">
-      <!-- Tab Navigation -->
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="letter">📝 The Letter</button>
-        <button class="tab-btn" data-tab="memories">💫 Our Memories</button>
-        <button class="tab-btn" data-tab="gallery">📸 Gallery</button>
-        <button class="tab-btn" data-tab="music">🎵 Playlist</button>
+    <section class="display" aria-live="polite">
+      <div id="expr" class="expr">0</div>
+      <div id="result" class="result"></div>
+    </section>
+
+    <section class="kbd" role="group" aria-label="calculator keypad">
+      <button data-fn="clear" class="btn wide">AC</button>
+      <button data-fn="delete" class="btn">⌫</button>
+      <button data-val="(" class="btn">(</button>
+      <button data-val=")" class="btn">)</button>
+
+      <button data-fn="ans" class="btn">ANS</button>
+      <button data-fn="pi" class="btn">π</button>
+      <button data-fn="exp" class="btn">eˣ</button>
+      <button data-val="/" class="btn op">÷</button>
+
+      <button data-val="7" class="btn">7</button>
+      <button data-val="8" class="btn">8</button>
+      <button data-val="9" class="btn">9</button>
+      <button data-val="*" class="btn op">×</button>
+
+      <button data-val="4" class="btn">4</button>
+      <button data-val="5" class="btn">5</button>
+      <button data-val="6" class="btn">6</button>
+      <button data-val="-" class="btn op">−</button>
+
+      <button data-val="1" class="btn">1</button>
+      <button data-val="2" class="btn">2</button>
+      <button data-val="3" class="btn">3</button>
+      <button data-val="+" class="btn op">+</button>
+
+      <button data-val="0" class="btn wide">0</button>
+      <button data-val="." class="btn">.</button>
+      <button data-fn="ans-apply" class="btn" title="Insert previous answer">Ans</button>
+      <button data-fn="equals" class="btn equals">=</button>
+
+      <div class="sc-row">
+        <button data-fn="sin" class="btn sc">sin</button>
+        <button data-fn="cos" class="btn sc">cos</button>
+        <button data-fn="tan" class="btn sc">tan</button>
+        <button data-fn="sqrt" class="btn sc">√</button>
       </div>
-
-      <!-- Letter Tab -->
-      <div id="letter" class="tab-content active">
-        <div class="letter-date" id="currentDate"></div>
-        
-        <div class="letter-greeting">Dear Love Ananya❤️,</div>
-        
-        <div class="letter-content">
-          <p>I've been trying to find the perfect words to express what you mean to me, and I realized that no amount of words could truly capture the depth of my feelings. So I'm writing this letter to you, hoping it brings a smile to your face.</p>
-
-          <p>From the moment I saw you, something in my heart changed. You're not just beautiful on the outside, but your <strong>kindness, intelligence, and compassion</strong> shine brighter than any star. Every moment spent with you feels like a beautiful dream I don't want to wake up from.</p>
-
-          <p>The way you laugh at my siliest jokes , the way you care about me, the little things you do without realizing how much they mean to me – these are the moments that make my days complete. You inspire me to be a better person, and I'm grateful for every second we share together.</p>
-
-          <p>When I'm with you, time seems to stand still. Your presence brings peace to my restless soul, and your smile is the most beautiful thing I've ever seen NGL it's so true. I find myself thinking about you at the most unexpected moments – during coffee, in the middle of work, before sleep BTW it is so madetory – and every thought brings warmth to my heart.</p>
-
-          <p>I want you to know that you're not just my crush, you're my INSPIRATION, my comfort, and my happiness. <strong>I admire your BEAUTY, your MATURENESS, and the way you face life with such grace.</strong> You make the ordinary moments extraordinary, and I cherish every memory we've created together.</p>
-
-          <p> Even tho we did'nt spend a lot time togher tho in this short time period i got to know that you're most appropiate gil i've ever seen, many highs and lows came between us but trust me ANANYA i nver stopped loving you and i can never ig that level of madness i've reached i can't express those feelings  – I just want a chance to make you as happy as you make me. I want to be there for you through thick and thin, to support your dreams, and to build beautiful memories together.</p>
-
-          <p>This letter is my heart on paper – raw, honest, and completely devoted to you. You deserve someone who will love you unconditionally, and I promise to be that person. You are worth every effort, every word, and every moment of my time.</p>
-
-          <p>I hope this letter finds you smiling. I hope it makes your heart skip a beat just like you make mine skip a beat every single day last but not the least can we start this year together agian i am asking genuinely.</p>
-
-          <div class="decorative-hearts">❤️ 💕 ❤️ 💕 ❤️</div>
-
-          <p>Forever yours,</p>
-        </div>
-
-        <div class="letter-signature">
-          <div class="signature-text">With all my love,</div>
-          <div class="signature-name">Debjyoti Ray</div>
-          <div style="font-size: 16px; color: #c41e3a; margin-top: 10px;">💝</div>
-        </div>
+      <div class="sc-row">
+        <button data-fn="pow2" class="btn sc">x²</button>
+        <button data-fn="pow" class="btn sc">^</button>
+        <button data-fn="log" class="btn sc">log</button>
+        <button data-fn="ln" class="btn sc">ln</button>
       </div>
-
-      <!-- Memories Tab -->
-      <div id="memories" class="tab-content">
-        <h3 style="color: #c41e3a; margin-bottom: 20px;">✨ Precious Moments ✨</h3>
-        <div class="memories-grid">
-          <div class="memory-card">
-            <div class="memory-title">First Meeting online tho</div>
-            <div class="memory-text">The day our eyes met, I knew something special was about to happen. Your smile changed everything.</div>
-          </div>
-
-          <div class="memory-card">
-            <div class="memory-title">Your Appearence</div>
-            <div class="memory-text">Nothing compares to the way you are Ananya.Your voice is music to my ears and joy to my heart.</div>
-          </div>
-
-          <div class="memory-card">
-            <div class="memory-title">Late Night Talks</div>
-            <div class="memory-text">Those conversations about dreams, life, and everything in between are my favorite moments with you.</div>
-          </div>
-
-          <div class="memory-card">
-            <div class="memory-title">Your Kindness</div>
-            <div class="memory-text">The best ever soul i have ever seen.</div>
-          </div>
-
-          <div class="memory-card">
-            <div class="memory-title">Simple moments</div>
-            <div class="memory-text">Simple moments like talking for so long time together mean the world to me when you're by my side.</div>
-          </div>
-
-          <div class="memory-card">
-            <div class="memory-title">Future Dreams</div>
-            <div class="memory-text">I dream of building a beautiful future with you, filled with love, laughter, and endless happiness.</div>
-          </div>
-        </div>
+      <div class="sc-row">
+        <button data-fn="fact" class="btn sc">x!</button>
+        <button data-fn="perm" class="btn sc">nPr</button>
+        <button data-fn="comb" class="btn sc">nCr</button>
+        <button data-fn="factoradic" class="btn sc">Factoradic</button>
       </div>
 
-      <!-- Gallery Tab -->
-      <div id="gallery" class="tab-content">
-        <h3 style="color: #c41e3a; margin-bottom: 20px;">🌹 flowers for you 🌹</h3>
-        <div class="gallery-grid">
-          <div class="gallery-item">
-            <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop" alt="Sunset moment">
-          </div>
-          <div class="gallery-item">
-            <img src="https://pngimg.com/uploads/tulip/tulip_PNG9020.png" alt="Romantic flowers">
-          </div>
-          <div class="gallery-item">
-            <img src="https://tse1.mm.bing.net/th/id/OIP.ecLAGNf9vgouBcjurea5ZQHaOl?pid=Api&P=0&h=180=crop" alt="Garden beauty">
-          </div>
-          <div class="gallery-item">
-            <img src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=300&h=300&fit=crop" alt="Rose elegance">
-          </div>
-          <div class="gallery-item">
-            <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop" alt="Nature's love">
-          </div>
-          <div class="gallery-item">
-            <img src="https://png.pngtree.com/png-clipart/20220730/original/pngtree-purple-tulip-flower-png-png-image_8443354.png" alt="Flower petals">
-          </div>
-        </div>
-      </div>
+    </section>
 
-      <!-- Music Tab -->
-      <div id="music" class="tab-content">
-        <div class="music-player">
-          <h3>🎵 Songs From My Heart 🎵</h3>
-          <audio id="bgMusic" controls>
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-            Your browser does not support audio.
-          </audio>
-
-          <div class="playlist">
-            <h4 style="margin: 0 0 12px; color: white; font-size: 14px;">📋 Romantic Playlist</h4>
-            <div class="playlist-item playing" data-src="C:\Users\roysh\Downloads\The Neighbourhood - Reflections (Official Audio).mp3">
-              <span>♫</span> When I Saw You
-            </div>
-            <div class="playlist-item" data-src="C:\Users\roysh\Downloads\The Neighbourhood - Sweater Weather (Official Video).mp3">
-              <span>♫</span> Sweater Weather               
-              <span>♫</span> Endless Love
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons" id="actionButtons" style="display: none;">
-      <button class="btn btn-primary" id="respondBtn">💌 Respond to This Letter</button>
-      <button class="btn btn-secondary" id="shareBtn">📤 Share This Love Letter</button>
-      <button class="btn btn-secondary" id="printBtn">🖨️ Print This Letter</button>
-    </div>
-
-    <footer>
-      <p>Made with ❤️ by someone who truly cares about you</p>
-      <p style="font-size: 12px; margin-top: 10px; opacity: 0.6;">© 2025 • A Digital Love Letter</p>
-    </footer>
-  </div>
-
+    <footer class="credits">Built with &hearts; — keyboard controls supported: Enter / Backspace / Escape</footer>
+  </main>
   <script>
-    // Envelope Click Handler
-    const envelope = document.getElementById('envelope');
-    const letterContainer = document.getElementById('letterContainer');
-    const actionButtons = document.getElementById('actionButtons');
-    let isOpened = false;
+    /* Inlined JS for Scientific Calculator (copied from calculator.js)
+     * This script supports a simple, fairly safe expression parser by
+     * replacing common function names with Math.<function> and then running Function(...)
+     * This is not meant for untrusted content but is safe for local usage in a user page.
+     */
 
-    envelope.addEventListener('click', function() {
-      isOpened = !isOpened;
-      if (isOpened) {
-        envelope.classList.add('opened');
-        setTimeout(() => {
-          letterContainer.style.display = 'block';
-          actionButtons.style.display = 'flex';
-          createFloatingHearts();
-        }, 600);
-      } else {
-        letterContainer.style.display = 'none';
-        actionButtons.style.display = 'none';
-        envelope.classList.remove('opened');
+    const exprEl = document.getElementById('expr');
+    const resultEl = document.getElementById('result');
+    const toggle = document.getElementById('angle-toggle');
+    const keypad = document.querySelector('.kbd');
+
+    let expression = '';
+    let lastAnswer = '';
+    let isDegree = false;
+
+    // Helper math functions
+    function fact(n){
+      // factorial for non-negative integers
+      if(typeof n !== 'number' || !Number.isFinite(n)) throw new Error('Factorial: number required');
+      if(!Number.isInteger(n) || n < 0) throw new Error('Factorial: integer >= 0 required');
+      if(n === 0 || n === 1) return 1;
+      let res = 1;
+      for(let i = 2; i <= n; i++) res *= i;
+      return res;
+    }
+
+    function perm(n, r){
+      if(!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error('nPr: invalid args');
+      return fact(n) / fact(n - r);
+    }
+
+    function comb(n, r){
+      if(!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error('nCr: invalid args');
+      return fact(n) / (fact(r) * fact(n - r));
+    }
+
+    function factoradic(n){
+      // Convert non-negative integer to factoradic representation (as string digits)
+      if(!Number.isInteger(n) || n < 0) throw new Error('Factoradic: integer >= 0 required');
+      if(n === 0) return '0';
+      const digits = [];
+      let i = 1;
+      while(n > 0){
+        digits.push(n % (i + 1));
+        n = Math.floor(n / (i + 1));
+        i++;
       }
-    });
+      return digits.reverse().join('');
+    }
 
-    // Set Current Date
-    const dateElement = document.getElementById('currentDate');
-    const today = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    dateElement.textContent = today.toLocaleDateString('en-US', options);
+    function updateDisplay(){
+      exprEl.textContent = expression || '0';
+    }
 
-    // Tab Switching
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    function safeEval(input){
+      // Replace unicode symbols
+      let s = input.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
 
-    tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const tabName = button.getAttribute('data-tab');
-        
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
-        
-        button.classList.add('active');
-        document.getElementById(tabName).classList.add('active');
+      // Basic sanitization: allow digits, operators, parentheses, dot, exclamation and letters
+      if(!/^[0-9+\-*/().,^%!\sA-Za-z]*$/.test(s)){
+        throw new Error('Invalid characters in expression');
+      }
+
+      // function mappings to Math
+      const tokens = {
+          'sqrt': 'Math.sqrt',
+          'log': 'Math.log10',
+          'ln': 'Math.log',
+          'pi': 'Math.PI',
+          'e': 'Math.E'
+      };
+
+      // apply degree conversion wrapper if necessary (wrap sin/cos/tan)
+      if(isDegree){
+        s = s.replace(/(sin|cos|tan)\s*\(/g, (m, fn) => `Math.${fn}(Math.PI/180*`);
+      } else {
+        s = s.replace(/(sin|cos|tan)\s*\(/g, (m, fn) => `Math.${fn}(`);
+      }
+
+      // Replace named functions
+      Object.keys(tokens).forEach(k=>{
+        const re = new RegExp('\\b'+k+'\\b','g');
+        s = s.replace(re, tokens[k]);
       });
-    });
 
-    // Music Playlist
-    const audio = document.getElementById('bgMusic');
-    const playlistItems = document.querySelectorAll('.playlist-item');
+      // Replace nCr / nPr typed by the user to our helper function names
+      s = s.replace(/\bnCr\b/g, 'comb');
+      s = s.replace(/\bnPr\b/g, 'perm');
 
-    playlistItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const src = item.getAttribute('data-src');
-        audio.src = src;
-        audio.play();
+      // exponent operator ^ -> Math.pow(a,b)
+      // Convert a^b to Math.pow(a,b) using a simple parser for ^ (right associative)
+        // Replace ^ with ** (JS exponent operator) so users can write x^y
+        s = s.replace(/\^/g, '**');
 
-        playlistItems.forEach(i => i.classList.remove('playing'));
-        item.classList.add('playing');
-      });
-    });
+      // e^x support: we have 'exp' named as e^x: replace "e^" occurrences
+        s = s.replace(/e\s*\*\*\s*([0-9\.\(A-Za-zPI\-+])/g, 'Math.exp($1)');
 
-    // Floating Hearts
-    function createFloatingHearts() {
-      for (let i = 0; i < 15; i++) {
-        setTimeout(() => {
-          const heart = document.createElement('div');
-          heart.textContent = '❤️';
-          heart.className = 'heart-float';
-          heart.style.left = Math.random() * 100 + '%';
-          heart.style.bottom = '-10px';
-          heart.style.animationDuration = (3 + Math.random() * 2) + 's';
-          document.body.appendChild(heart);
+      // replace percent:
+      s = s.replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
 
-          setTimeout(() => heart.remove(), 5000);
-        }, i * 100);
+      // Replace Ans with previous last answer
+      s = s.replace(/\bANS\b/g, '('+ (lastAnswer||'0') +')');
+
+      // Replace factorial postfix x! or (expr)! using a simple parser for most typical cases
+      // Match a number (int/float) or a fully parenthesized expression right before '!'
+      s = s.replace(/(\([^()]*\)|\d+(?:\.\d+)?)\s*!/g, 'fact($1)');
+
+      // Finally use Function to evaluate and return
+      // allow Math functions only
+      try{
+        // Provide our custom functions to the evaluation environment as well
+        // This allows expressions like perm(5,2) or fact(5) or factoradic(10)
+        const f = new Function('Math','fact','perm','comb','factoradic', 'return ('+s+');');
+        return f(Math, fact, perm, comb, factoradic);
+      }catch(e){
+        throw new Error('Parse error');
       }
     }
 
-    // Respond Button
-    document.getElementById('respondBtn').addEventListener('click', () => {
-      alert('💝 Thank you for reading my letter!\n\nI hope it touched your heart as much as you touch mine every day.\n\nWould you like to meet and talk about us? 🌹');
-      createFloatingHearts();
-    });
+    function press(val){
+      expression = (expression === '0' || expression === '') ? String(val) : expression + String(val);
+      updateDisplay();
+    }
 
-    // Share Button
-    document.getElementById('shareBtn').addEventListener('click', () => {
-      const text = 'Someone special created a beautiful digital love letter for me! Check it out: ' + window.location.href;
-      
-      if (navigator.share) {
-        navigator.share({
-          title: 'A Love Letter For You 💌',
-          text: text
-        });
-      } else {
-        alert('Share this link:\n' + window.location.href);
+    function runFunc(name){
+      switch(name){
+        case 'clear': expression = ''; resultEl.textContent = ''; break;
+        case 'delete': expression = expression.slice(0,-1); break;
+        case 'equals':
+          try{
+            const res = safeEval(expression);
+            resultEl.textContent = String(res);
+            lastAnswer = String(res);
+            expression = String(res);
+          }catch(e){
+            resultEl.textContent = e.message;
+          }
+          break;
+        case 'ans': expression = String(lastAnswer||'0'); break;
+        case 'ans-apply': expression = (expression || '0') + String(lastAnswer||'0'); break;
+        case 'pi': expression += 'pi'; break;
+        case 'exp': expression += 'e^'; break;
+        case 'sin': expression += 'sin('; break;
+        case 'cos': expression += 'cos('; break;
+        case 'tan': expression += 'tan('; break;
+        case 'sqrt': expression += 'sqrt('; break;
+        case 'ln': expression += 'ln('; break;
+        case 'log': expression += 'log('; break;
+        case 'pow2': expression += '^2'; break;
+        case 'pow': expression += '^'; break;
+        case 'fact':
+          // Append postfix factorial to last token for convenience
+          if(/\d|\)$/.test(expression.slice(-1))){
+            expression += '!';
+          } else {
+            // otherwise insert as a function name awaiting arguments
+            expression += 'fact(';
+          }
+          break;
+        case 'perm': expression += 'perm('; break;
+        case 'comb': expression += 'comb('; break;
+        case 'factoradic':
+          // If there is a number expression already, evaluate and show factoradic directly
+          if(expression && /\d|\)$/.test(expression.slice(-1))){
+            try{
+              const value = safeEval(expression);
+              const f = factoradic(Number(value));
+              resultEl.textContent = String(f);
+              expression = String(f); // optionally replace expression with the factoradic string
+            }catch(e){
+              resultEl.textContent = e.message;
+            }
+          } else {
+            expression += 'factoradic(';
+          }
+          break;
       }
+      updateDisplay();
+    }
+
+    keypad.addEventListener('click', e=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const val = btn.getAttribute('data-val');
+      const fn = btn.getAttribute('data-fn');
+      if(val) press(val);
+      if(fn) runFunc(fn);
     });
 
-    // Print Button
-    document.getElementById('printBtn').addEventListener('click', () => {
-      window.print();
+    // keyboard support
+    window.addEventListener('keydown', e=>{
+      if(e.key === 'Enter') { runFunc('equals'); e.preventDefault(); }
+      if(e.key === 'Backspace') { runFunc('delete'); e.preventDefault(); }
+      if(e.key === 'Escape') { runFunc('clear'); e.preventDefault(); }
+      if('0123456789.+-*/%^()!'.includes(e.key)) { press(e.key); e.preventDefault(); }
     });
 
-    // Auto-create floating hearts on page load
-    window.addEventListener('load', () => {
-      setInterval(() => {
-        if (Math.random() > 0.8) {
-          const heart = document.createElement('div');
-          heart.textContent = '💕';
-          heart.className = 'heart-float';
-          heart.style.left = Math.random() * 100 + '%';
-          heart.style.bottom = '-10px';
-          heart.style.fontSize = (14 + Math.random() * 12) + 'px';
-          heart.style.animationDuration = (4 + Math.random() * 2) + 's';
-          document.body.appendChild(heart);
-
-          setTimeout(() => heart.remove(), 6000);
-        }
-      }, 1500);
+    // Angle toggle
+    toggle.addEventListener('change', e=>{
+      isDegree = toggle.checked; // checked = degrees
     });
+
+    // Initialize
+    updateDisplay();
   </script>
 </body>
 </html>
